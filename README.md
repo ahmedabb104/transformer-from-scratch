@@ -1,2 +1,2 @@
-# transformer-from-scratch
-Building a transformer from scratch - for educational purposes
+# Implementing a Transformer From Scratch
+In progress...
