@@ -1,2 +1,6 @@
-# Implementing a Transformer From Scratch
 In progress...
+
+# Implementing a Transformer From Scratch
+A PyTorch implementation of the base transformer model proposed in [Attention Is All You Need](https://arxiv.org/abs/1706.03762).
+
+## Architecture overview
