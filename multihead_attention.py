@@ -20,7 +20,7 @@ class MultiheadAttention(nn.Module):
         self.fc_out = nn.Linear(embedding_dim, embedding_dim)
 
     def forward(self, queries, keys, values, mask=None):
-        # Number of examples we send at the same time
+        # Number of examples we send at the same time, i.e. batch size
         N = queries.shape[0]
         # Source sequence length or target sequence length
         query_len, key_len, value_len = queries.shape[1], keys.shape[1], values.shape[1]
@@ -32,4 +32,15 @@ class MultiheadAttention(nn.Module):
         values = values.reshape(N, value_len, self.heads, self.head_dim)
 
         # Scaled-dot product attention (SDPA): multiply the queries with the keys
-        
+        # product shape: (N, heads, query_len, key_len)
+        energy = torch.einsum("nqhd,nkhd->nhqk", [queries, keys])
+        # Add optional mask
+        if mask is not None:
+            energy = energy.masked_fill(mask == 0, float("-1e20"))
+        sdpa = torch.softmax(energy / self.embedding_dim ** 0.5, dim=-1)
+        # Attention output
+        sdpa_out = torch.einsum("nhqk,nkhd->nqhd", [sdpa, values])
+        # (batch_size, seq_len, embedding_dim)
+        sdpa_out = self.fc_out(sdpa_out)
+
+        return sdpa_out
