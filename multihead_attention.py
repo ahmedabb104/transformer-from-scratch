@@ -31,6 +31,10 @@ class MultiheadAttention(nn.Module):
         keys = keys.reshape(N, key_len, self.heads, self.head_dim)
         values = values.reshape(N, value_len, self.heads, self.head_dim)
 
+        queries = self.queries(queries)
+        value = self.values(values)
+        key = self.keys(keys)
+
         # Scaled-dot product attention (SDPA): multiply the queries with the keys
         # product shape: (N, heads, query_len, key_len)
         energy = torch.einsum("nqhd,nkhd->nhqk", [queries, keys])

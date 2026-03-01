@@ -19,7 +19,7 @@ class Encoder(nn.Module):
         self.device = device
         self.word_embedding = nn.Embedding(src_vocab_size, embedding_dim)
         self.positional_embedding = nn.Embedding(max_length, embedding_dim)
-        self.layers = nn.ModuleList([TransformerBlock(embedding_dim, heads, forward_expansion, dropout)])
+        self.layers = nn.ModuleList([TransformerBlock(embedding_dim, heads, forward_expansion, dropout) for _ in range(num_layers)])
         self.dropout = nn.Dropout(dropout)
     
     def forward(self, x, mask=None):
