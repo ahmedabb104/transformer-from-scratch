@@ -1,6 +1,6 @@
-from torch import nn
+import torch
+import torch.nn as nn
 from multihead_attention import MultiheadAttention
-from positional_encoding import PositionalEncoding
 
 # General transformer block: contains the multihead attention and feed forward network
 class TransformerBlock(nn.Module):
@@ -24,13 +24,13 @@ class TransformerBlock(nn.Module):
 
     def forward(self, queries, keys, values, mask=None):
         attention = self.attention(queries, keys, values, mask)
-        # Add skip connection and attention output
+        # Add skip connection and attention output in the normalization layer
         x = self.dropout(self.norm1(attention + queries))
         # Feed forward network
         forward = self.feed_forward(x)
-        # Second normalization and dropout
-        x = self.dropout(self.norm2(forward + x))
-        return x
+        # Second normalization layer
+        out = self.dropout(self.norm2(forward + x))
+        return out
 
 
 class Encoder(nn.Module):
@@ -56,4 +56,9 @@ class Encoder(nn.Module):
     def forward(self, x, mask=None):
         # N examples, seq_length tokens
         N, seq_length = x.shape
-        
+        positions = torch.arange(0, seq_length).expand(N, seq_length).to(self.device)
+        out = self.dropout(self.word_embedding(x) + self.positional_embedding(positions))
+        for layer in self.layers:
+            # v, k, q are the same in the encoder
+            out = layer(out, out, out, mask)
+        return out
